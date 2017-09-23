@@ -12,6 +12,29 @@ const issues = [{
 }];
 
 class IssueList extends React.Component {
+  constructor() {
+    super();
+    this.state = { issues: [] };
+    this.createIssue = this.createIssue.bind(this);
+  }
+
+  componentDidMount() {
+    this.loadData();
+  }
+
+  loadData() {
+    setTimeout(() => {
+      this.setState({ issues: issues });
+    }, 500);
+  }
+
+  createIssue(newIssue) {
+    const newIssues = this.state.issues.slice();
+    newIssue.id = this.state.issues.length + 1;
+    newIssues.push(newIssue);
+    this.setState({ issues: newIssues });
+  }
+
   render() {
     return React.createElement(
       'div',
@@ -23,9 +46,9 @@ class IssueList extends React.Component {
       ),
       React.createElement(IssueFilter, null),
       React.createElement('hr', null),
-      React.createElement(IssueTable, { issues: issues }),
+      React.createElement(IssueTable, { issues: this.state.issues }),
       React.createElement('hr', null),
-      React.createElement(IssueAdd, null)
+      React.createElement(IssueAdd, { createIssue: this.createIssue })
     );
   }
 }
@@ -100,11 +123,39 @@ class IssueTable extends React.Component {
 }
 
 class IssueAdd extends React.Component {
+  constructor() {
+    super();
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleSubmit(e) {
+    e.preventDefault();
+    var form = document.forms.issueAdd;
+    this.props.createIssue({
+      owner: form.owner.value,
+      title: form.title.value,
+      status: 'New',
+      created: new Date()
+    });
+    // clear the form for the next input
+    form.owner.value = "";form.title.value = "";
+  }
+
   render() {
     return React.createElement(
       'div',
       null,
-      'This is a placeholder for an Issue Add entry form.'
+      React.createElement(
+        'form',
+        { name: 'issueAdd', onSubmit: this.handleSubmit },
+        React.createElement('input', { type: 'text', name: 'owner', placeholder: 'Owner' }),
+        React.createElement('input', { type: 'text', name: 'title', placeholder: 'Title' }),
+        React.createElement(
+          'button',
+          null,
+          'Add'
+        )
+      )
     );
   }
 }
